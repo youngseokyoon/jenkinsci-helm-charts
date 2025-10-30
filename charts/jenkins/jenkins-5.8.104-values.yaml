@@ -39,6 +39,7 @@ controller:
     - workflow-aggregator:608.v67378e9d3db_1
     - git:5.8.0
     - configuration-as-code:2006.v001a_2ca_6b_574
+    - generic-webhook-trigger:2.4.1
 
   JCasC:
     defaultConfig: true
