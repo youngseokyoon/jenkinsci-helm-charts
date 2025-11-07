@@ -24,15 +24,23 @@ controller:
     - name: DOCKER_HOST
       value: unix:///var/run/docker.sock
 
-  serviceType: NodePort
+  # ClusterIP 관련 설정.S
+  serviceType: ClusterIP
   servicePort: 8080
   targetPort: 8080
-  nodePort: 30003
+  agentListenerServiceType: ClusterIP
+  # ClusterIP 관련 설정.E
+
+  # NodePort 관련 설정.S
+#  serviceType: NodePort
+#  servicePort: 8080
+#  targetPort: 8080
+#  nodePort: 30003
+#  agentListenerServiceType: NodePort
+  # NodePort 관련 설정.E
 
   agentListenerEnabled: true
   agentListenerPort: 50000
-
-  agentListenerServiceType: NodePort
 
   installPlugins:
     - kubernetes:4384.v1b_6367f393d9
