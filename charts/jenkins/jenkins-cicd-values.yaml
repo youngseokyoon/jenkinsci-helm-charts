@@ -1,0 +1,93 @@
+name: cicd-jenkins
+namespace: cicd-jenkins
+
+controller:
+  runAsUser: 1000
+  fsGroup: 1000
+  image:
+    repository: jenkins/jenkins
+    tag: lts
+    pullPolicy: IfNotPresent
+
+  admin:
+    user: admin
+    password: admin
+
+  resources:
+    requests:
+      cpu: "1500m"
+      memory: "4Gi"
+    limits:
+      cpu: "1500m"
+      memory: "4Gi"
+
+  # ClusterIP 관련 설정.S
+  serviceType: ClusterIP
+  servicePort: 8080
+  targetPort: 8080
+  agentListenerServiceType: ClusterIP
+  # ClusterIP 관련 설정.E
+
+  # NodePort 관련 설정.S
+#  serviceType: NodePort
+#  servicePort: 8080
+#  targetPort: 8080
+#  nodePort: 30003
+#  agentListenerServiceType: NodePort
+  # NodePort 관련 설정.E
+
+  agentListenerEnabled: true
+  agentListenerPort: 50000
+
+  installPlugins:
+    - kubernetes:4392.v19cea_fdb_5913
+    - workflow-aggregator:608.v67378e9d3db_1
+    - git:5.8.0
+    - configuration-as-code:2006.v001a_2ca_6b_574
+    - generic-webhook-trigger:2.4.1
+    - oic-auth:4.609.v9de140f63d01
+
+  JCasC:
+    defaultConfig: true
+    configScripts:
+      welcome-message: |
+        jenkins:
+          systemMessage: "Welcome to CI/CD Jenkins on Kubernetes"
+
+  volumes:
+    - type: PVC
+      claimName: jenkins-pvc
+      mountPath: /var/jenkins_home
+      readOnly: false
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    tls:
+      - hosts:
+          - jenkins.cicd.com
+        secretName: jenkins-tls
+    rules:
+      - host: jenkins.cicd.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: cicd-jenkins
+                  port:
+                    number: 8080
+agent:
+  enabled: true
+  garbageCollection:
+    enabled: true
+
+persistence:
+  enabled: true
+  existingClaim: jenkins-pvc
+  volumePermissions:
+    enabled: true
+
+rbac:
+  create: true
